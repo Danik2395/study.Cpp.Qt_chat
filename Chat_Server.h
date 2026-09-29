@@ -15,6 +15,8 @@ class Chat_Server : public QTcpServer, public Network_Node<Chat_Server>
 {
     Q_OBJECT
 
+        friend class Network_Node<Chat_Server>;
+
 private:
     QMap<QString, QSet<QTcpSocket*>> rooms;
     QMap<QTcpSocket*, QString> client_rooms; // Reverse map to avoid cycle on delete
@@ -95,7 +97,7 @@ private:
                 leave_room(socket);
                 break;
 
-            default: assert(false && "handle_message: Invalid message type.");
+            default: assert(false && "read_message_callback: Invalid message type.");
         }
     }
 

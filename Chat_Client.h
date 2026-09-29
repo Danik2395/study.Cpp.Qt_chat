@@ -13,6 +13,8 @@ class Chat_Client : public QObject, public Network_Node<Chat_Client>
 {
     Q_OBJECT
 
+    friend class Network_Node<Chat_Client>;
+
 private:
     QTcpSocket* socket_tcp;
     QUdpSocket* socket_udp;
@@ -27,11 +29,6 @@ public:
 
         socket_udp = new QUdpSocket(this);
         connect(socket_udp, &QUdpSocket::readyRead, this, &Chat_Client::handle_discovery_responce);
-    }
-
-    void read_message_callback(QTcpSocket* s, const Message& msg)
-    {
-        emit message_receieved(msg);
     }
 
     void send_discovery_request()
@@ -70,4 +67,10 @@ private slots:
 
 signals:
     void message_receieved(const Message& msg);
+
+private:
+    void read_message_callback(QTcpSocket* s, const Message& msg)
+    {
+        emit message_receieved(msg);
+    }
 };

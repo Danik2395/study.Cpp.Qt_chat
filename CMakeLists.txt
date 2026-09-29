@@ -13,7 +13,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 set(SOURCES
     Network_Node.h
-    main.cpp
+    Chat_Server.h
+    Chat_Client.h
 )
 
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
