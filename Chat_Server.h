@@ -64,8 +64,8 @@ private slots:
             Message request_msg;
             Message::read(datagram_stream, request_msg);
 
-            if (request_msg.type != Message::Type::SERVER_SEARCH &&
-                request_msg.sender_id != QString::number(SECRET_CODE)) return;
+            if (request_msg.type != Message::Type::SERVER_SEARCH ||
+                request_msg.sender_id != QString::number(SECRET_CODE)) continue;
 
             Message response_msg = {
                 .type = Message::Type::SERVER_SEARCH_RESPONCE,

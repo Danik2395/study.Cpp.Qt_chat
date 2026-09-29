@@ -58,8 +58,8 @@ private slots:
             Message responce_msg;
             Message::read(datagram_stream, responce_msg);
 
-            if (responce_msg.type != Message::Type::SERVER_SEARCH_RESPONCE &&
-                responce_msg.sender_id != QString::number(SECRET_CODE)) return;
+            if (responce_msg.type != Message::Type::SERVER_SEARCH_RESPONCE ||
+                responce_msg.sender_id != QString::number(SECRET_CODE)) continue;
 
             socket_tcp->connectToHost(responce_datagram.senderAddress().toString(), CHAT_PORT);
         }
