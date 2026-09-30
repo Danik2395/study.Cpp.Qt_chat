@@ -34,7 +34,7 @@ public:
     void send_discovery_request() const
     {
         Message discovery_msg = {
-            .type = Message::Type::SERVER_SEARCH,
+            .type = Message::Type::SERVER_SEARCH_REQUEST,
             .sender_id = QString::number(SECRET_CODE)
         };
 
