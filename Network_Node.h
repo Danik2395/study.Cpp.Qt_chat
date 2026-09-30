@@ -55,7 +55,7 @@ public:
         static_assert(Network_Node_Derived<Derived>);
     }
 
-    void send_message(QTcpSocket* socket, const Message& msg)
+    void send_message(QTcpSocket* socket, const Message& msg) const
     {
         if (!socket || !socket->isOpen()) return;
 

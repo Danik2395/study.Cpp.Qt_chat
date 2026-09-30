@@ -121,7 +121,7 @@ private:
         socket->deleteLater();
     }
 
-    void broadcast_to_room(const QString& room_id, const Message& msg)
+    void broadcast_to_room(const QString& room_id, const Message& msg) const
     {
         if (!rooms.contains(room_id)) return;
 

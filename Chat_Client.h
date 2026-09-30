@@ -31,7 +31,7 @@ public:
         connect(socket_udp, &QUdpSocket::readyRead, this, &Chat_Client::handle_discovery_responce);
     }
 
-    void send_discovery_request()
+    void send_discovery_request() const
     {
         Message discovery_msg = {
             .type = Message::Type::SERVER_SEARCH,
@@ -47,7 +47,7 @@ public:
     }
 
 private slots:
-    void handle_discovery_responce()
+    void handle_discovery_responce() const
     {
         while (socket_udp->hasPendingDatagrams())
         {
