@@ -72,5 +72,7 @@ private:
     void read_message_callback(QTcpSocket* s, const Message& msg)
     {
         emit message_receieved(msg);
+        // Slots called immediately
+        // And code after emmit will be execuded only after all slots have returned
     }
 };

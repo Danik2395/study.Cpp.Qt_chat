@@ -87,14 +87,16 @@ private:
         {
             case Message::Type::JOIN_ROOM:
                 join_room(socket, msg.room_id);
+                send_chat_info_message(Message::Type::JOIN_ROOM, msg.room_id, msg.sender_id);
                 break;
 
-            case Message::Type::IN_ROOM:
+            case Message::Type::USR_MSG:
                 broadcast_to_room(msg.room_id, msg);
                 break;
 
             case Message::Type::LEAVE_ROOM:
                 leave_room(socket);
+                send_chat_info_message(Message::Type::LEAVE_ROOM, msg.room_id, msg.sender_id);
                 break;
 
             default: assert(false && "read_message_callback: Invalid message type.");
@@ -129,5 +131,29 @@ private:
         {
             send_message(socket, msg);
         }
+    }
+
+    void send_chat_info_message(Message::Type msg_type, const QString& room_id, const QString& sender_id) const
+    {
+        Message chat_info_msg = {
+            .type = Message::Type::CHAT_INFO_MSG,
+            .sender_id = sender_id,
+            .room_id = room_id,
+        };
+
+        switch (msg_type)
+        {
+            case Message::Type::JOIN_ROOM:
+                chat_info_msg.payload = QString("[INFO] " + sender_id + " joined room " + room_id).toUtf8();
+                break;
+
+            case Message::Type::LEAVE_ROOM:
+                chat_info_msg.payload = QString("[INFO] " + sender_id + " left room " + room_id).toUtf8();
+                break;
+
+            default: assert(false && "send_info: Invalid message type.");
+        }
+
+        broadcast_to_room(room_id, chat_info_msg);
     }
 };

@@ -19,8 +19,10 @@ struct Message
     {
         JOIN_ROOM,
         LEAVE_ROOM,
-        IN_ROOM,
-        SERVER_SEARCH,
+        USR_MSG,
+        CHAT_INFO_MSG,
+        INFO,
+        SERVER_SEARCH_REQUEST,
         SERVER_SEARCH_RESPONCE
     };
 
@@ -67,7 +69,7 @@ public:
         socket->write(out_bytes);
     }
 
-    void read_message(QTcpSocket* socket)
+    void read_message(QTcpSocket* socket) // Not const callback
     {
         QDataStream socket_in_stream(socket);
         socket_in_stream.setVersion(QDataStream::Qt_6_0);
