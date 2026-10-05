@@ -9,8 +9,10 @@
 #include <qtypes.h>
 #include <qudpsocket.h>
 
-constexpr quint16 CHAT_PORT = 45454;
-constexpr quint16 SECRET_CODE = 12356;
+constexpr quint16 CHAT_PORT     = 45454;
+constexpr quint16 SECRET_CODE   = 12356;
+constexpr int     MAX_ROOM_ID   = 15;
+constexpr int     MAX_SENDER_ID = 15;
 
 // #pragma pack(push, 1) // Stash current allignment in stack and set allignment to one
 struct Message
@@ -19,7 +21,7 @@ struct Message
     {
         JOIN_ROOM,
         LEAVE_ROOM,
-        USR_MSG,
+        CHAT_USR_MSG,
         CHAT_INFO_MSG,
         INFO,
         SERVER_SEARCH_REQUEST,

@@ -23,6 +23,13 @@ private:
 
     QUdpSocket* udp_listener;
 
+    enum ROOM_JOIN_CODE
+    {
+        PASS,
+        ROOM_ID_FAIL,
+        SENDER_ID_FAIL
+    };
+
 public:
     Chat_Server(QObject* parent = nullptr) : QTcpServer(parent)
     {
@@ -86,11 +93,12 @@ private:
         switch (msg.type)
         {
             case Message::Type::JOIN_ROOM:
+                if (check_on_join_room(socket, msg) != PASS) return;
                 join_room(socket, msg.room_id);
                 send_chat_info_message(Message::Type::JOIN_ROOM, msg.room_id, msg.sender_id);
                 break;
 
-            case Message::Type::USR_MSG:
+            case Message::Type::CHAT_USR_MSG:
                 broadcast_to_room(msg.room_id, msg);
                 break;
 
@@ -100,6 +108,30 @@ private:
                 break;
 
             default: assert(false && "read_message_callback: Invalid message type.");
+        }
+    }
+
+    ROOM_JOIN_CODE check_on_join_room(QTcpSocket* socket, const Message& msg) const
+    {
+        if (msg.room_id.size() <= MAX_ROOM_ID) return PASS;
+        else
+        {
+            send_message(socket,
+                    {
+                    .type = Message::Type::INFO,
+                    .payload = QString("Room id is more than " + QString::number(MAX_ROOM_ID) + ".").toUtf8()
+                    });
+            return ROOM_ID_FAIL;
+        }
+        if (msg.sender_id.size() <= MAX_ROOM_ID) return PASS;
+        else
+        {
+            send_message(socket,
+                    {
+                    .type = Message::Type::INFO,
+                    .payload = QString("Sender id is more than " + QString::number(MAX_SENDER_ID) + ".").toUtf8()
+                    });
+            return SENDER_ID_FAIL;
         }
     }
 
