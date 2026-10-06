@@ -62,6 +62,7 @@ private slots:
                 responce_msg.sender_id != QString::number(SECRET_CODE)) continue;
 
             socket_tcp->connectToHost(responce_datagram.senderAddress().toString(), CHAT_PORT);
+            emit connected_to_server();
         }
     }
 

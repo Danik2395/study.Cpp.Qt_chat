@@ -95,6 +95,10 @@ private:
             case Message::Type::JOIN_ROOM:
                 if (check_on_join_room(socket, msg) != PASS) return;
                 join_room(socket, msg.room_id);
+                send_message_to_socket(socket,
+                        {
+                        .type = Message::Type::ROOM_JOINED,
+                        });
                 send_chat_info_message(Message::Type::JOIN_ROOM, msg.room_id, msg.sender_id);
                 break;
 
@@ -116,7 +120,7 @@ private:
         if (msg.room_id.size() <= MAX_ROOM_ID) return PASS;
         else
         {
-            send_message(socket,
+            send_message_to_socket(socket,
                     {
                     .type = Message::Type::INFO,
                     .payload = QString("Room id is more than " + QString::number(MAX_ROOM_ID) + ".").toUtf8()
@@ -126,7 +130,7 @@ private:
         if (msg.sender_id.size() <= MAX_ROOM_ID) return PASS;
         else
         {
-            send_message(socket,
+            send_message_to_socket(socket,
                     {
                     .type = Message::Type::INFO,
                     .payload = QString("Sender id is more than " + QString::number(MAX_SENDER_ID) + ".").toUtf8()
@@ -161,7 +165,7 @@ private:
 
         for (QTcpSocket* socket : rooms[room_id])
         {
-            send_message(socket, msg);
+            send_message_to_socket(socket, msg);
         }
     }
 

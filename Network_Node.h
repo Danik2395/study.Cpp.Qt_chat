@@ -20,6 +20,7 @@ struct Message
     enum Type
     {
         JOIN_ROOM,
+        ROOM_JOINED,
         LEAVE_ROOM,
         CHAT_USR_MSG,
         CHAT_INFO_MSG,
@@ -53,13 +54,13 @@ concept Network_Node_Derived = requires (Derived derived, QTcpSocket* sock, cons
 template <typename Derived>
 class Network_Node
 {
-public:
+protected:
     virtual ~Network_Node()
     {
         static_assert(Network_Node_Derived<Derived>);
     }
 
-    void send_message(QTcpSocket* socket, const Message& msg) const
+    void send_message_to_socket(QTcpSocket* socket, const Message& msg) const
     {
         if (!socket || !socket->isOpen()) return;
 
