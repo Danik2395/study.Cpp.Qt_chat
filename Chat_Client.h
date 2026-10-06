@@ -46,6 +46,10 @@ public:
         socket_udp->writeDatagram(discovery_request, QHostAddress::Broadcast, CHAT_PORT);
     }
 
+signals:
+    void message_receieved(const Message& msg);
+    void connected_to_server() const;
+
 private slots:
     void handle_discovery_responce() const
     {
@@ -65,9 +69,6 @@ private slots:
             emit connected_to_server();
         }
     }
-
-signals:
-    void message_receieved(const Message& msg);
 
 private:
     void read_message_callback(QTcpSocket* s, const Message& msg)
