@@ -5,6 +5,9 @@
 #include <QWidget>
 #include <QEventLoop>
 #include <QTimer>
+#include <QDate>
+#include <QTime>
+#include <QTextCursor>
 #include <QPushButton>
 #include <qpushbutton.h>
 #include <qstackedwidget.h>
@@ -52,27 +55,42 @@ public:
         stacked_widget->addWidget(chat_widget);
 
         chat_ui->label_room_info->setProperty("room_info_property", chat_ui->label_room_info->text());
+        login_ui->label_server_status->setProperty("server_status_property", login_ui->label_server_status->text());
+
+        login_ui->edit_room_id->setMaxLength(14);
+        login_ui->edit_sender_id->setMaxLength(14);
 
         toggle_controls_pressable_state(false);
 
         connect(login_ui->btn_connect_server, &QPushButton::clicked, this, [this](){
                 QEventLoop loop;
 
-                connect(&chat, &Chat_Client::message_receieved, &loop, &QEventLoop::quit);
+                login_ui->btn_connect_server->setEnabled(false);
+
+                connect(&chat, &Chat_Client::message_recieved, &loop, &QEventLoop::quit);
                 connect(&chat, &Chat_Client::connected_to_server, this, [this](){
                         toggle_controls_pressable_state(true);
-                        login_ui->btn_connect_room->setEnabled(false);
                         });
 
                 chat.send_discovery_request();
 
-                QTimer::singleShot(TIME_TO_WAIT_SERVER_RESPONT_SEC , &loop, &QEventLoop::quit);
+                QTimer::singleShot(TIME_TO_WAIT_SERVER_RESPONT_SEC , this, [this, &loop](){
+                        QString server_status_text = chat_ui->label_room_info->property("server_status_property").toString();
+                        login_ui->label_server_status->setText(std::move(server_status_text.arg("Join request time expired.")));
+                        login_ui->btn_connect_server->setEnabled(true);
+                        });
 
                 loop.exec();
                 });
 
-        connect(&chat, &Chat_Client::message_receieved, this, &App_Client::on_message_recieved);
-        connect(login_ui->btn_connect_room, &QPushButton::clicked, this, &App_Client::send_join_room_message);
+        connect(&chat, &Chat_Client::message_recieved, this, &App_Client::on_message_recieved);
+        connect(login_ui->btn_connect_room, &QPushButton::clicked, this, &App_Client::request_room_join);
+
+        connect(chat_ui->edit_new_message, &QLineEdit::returnPressed, this, &App_Client::send_message_to_room);
+        connect(chat_ui->btn_send_message, &QPushButton::clicked, this, &App_Client::send_message_to_room);
+
+        connect(chat_ui->btn_leave, &QPushButton::clicked, this, &App_Client::on_room_leave);
+        connect(&chat, &Chat_Client::server_disconnected, this, &App_Client::on_bad_room_leave);
     }
 
 private:
@@ -93,30 +111,47 @@ private:
 
     void show_message(Message msg)
     {
+        QString text = QString("\n%1 %2\n%3: %4\n")
+            .arg(QDate::currentDate().toString("dd.MM.yyyy"))
+            .arg(QTime::currentTime().toString("HH:mm:ss"))
+            .arg(msg.sender_id)
+            .arg(QString::fromUtf8(msg.payload));
 
+        chat_ui->edit_room_messages->moveCursor(QTextCursor::End);
+        chat_ui->edit_room_messages->insertPlainText(text);
     }
 
     void show_info_message(Message msg)
     {
+        QString text = QString("\n%1\n").arg(QString::fromUtf8(msg.payload));
 
+        chat_ui->edit_room_messages->moveCursor(QTextCursor::End);
+        chat_ui->edit_room_messages->insertPlainText(text);
     }
 
     void change_ui_on_room_joined(Message msg)
     {
-        stacked_widget->setCurrentWidget(chat_widget);
         QString room_info_text = chat_ui->label_room_info->property("room_info_property").toString();
         chat_ui->label_room_info->setText(std::move(room_info_text.arg(msg.room_id).arg(msg.sender_id)));
 
         chat_ui->edit_room_messages->clear();
         chat_ui->edit_new_message->clear();
+
+        stacked_widget->setCurrentWidget(chat_widget);
+    }
+
+    void change_ui_on_room_left()
+    {
+        login_ui->btn_connect_server->setEnabled(true);
+        stacked_widget->setCurrentWidget(login_widget);
     }
 
 private slots:
-    void send_join_room_message()
+    void request_room_join()
     {
         QEventLoop loop;
 
-        connect(&chat, &Chat_Client::message_receieved, &loop, &QEventLoop::quit);
+        connect(&chat, &Chat_Client::message_recieved, &loop, &QEventLoop::quit);
 
         toggle_controls_pressable_state(false);
 
@@ -130,9 +165,23 @@ private slots:
         toggle_controls_pressable_state(true);
     }
 
+    void on_room_leave()
+    {
+        chat.send_leave_room_request();
+        change_ui_on_room_left();
+    }
+
+    void on_bad_room_leave()
+    {
+        change_ui_on_room_left();
+    }
+
     void send_message_to_room()
     {
+        if (chat_ui->edit_new_message->text().isEmpty()) return;
+        chat.send_message_to_room(chat_ui->edit_new_message->text());
 
+        chat_ui->edit_new_message->clear();
     }
 
     void on_message_recieved(Message msg)
@@ -141,8 +190,11 @@ private slots:
         switch (msg.type)
         {
             case Message::Type::INFO:
-                // unhandled
+                {
+                QString server_status_text = chat_ui->label_room_info->property("server_status_property").toString();
+                login_ui->label_server_status->setText(std::move(server_status_text.arg(QString::fromUtf8(msg.payload))));
                 break;
+                }
 
             case Message::Type::CHAT_USR_MSG:
                 show_message(std::move(msg));
@@ -154,6 +206,10 @@ private slots:
 
             case Message::Type::ROOM_JOINED:
                 change_ui_on_room_joined(std::move(msg));
+                break;
+
+            case Message::Type::ROOM_LEFT:
+                change_ui_on_room_left();
                 break;
 
             default: return;

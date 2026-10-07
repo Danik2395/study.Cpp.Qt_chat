@@ -22,6 +22,7 @@ struct Message
         JOIN_ROOM,
         ROOM_JOINED,
         LEAVE_ROOM,
+        ROOM_LEFT,
         CHAT_USR_MSG,
         CHAT_INFO_MSG,
         INFO,

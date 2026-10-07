@@ -98,6 +98,8 @@ private:
                 send_message_to_socket(socket,
                         {
                         .type = Message::Type::ROOM_JOINED,
+                        .sender_id = msg.sender_id,
+                        .room_id = msg.room_id
                         });
                 send_chat_info_message(Message::Type::JOIN_ROOM, msg.room_id, msg.sender_id);
                 break;
@@ -108,6 +110,10 @@ private:
 
             case Message::Type::LEAVE_ROOM:
                 leave_room(socket);
+                send_message_to_socket(socket,
+                        {
+                        .type = Message::Type::ROOM_LEFT,
+                        });
                 send_chat_info_message(Message::Type::LEAVE_ROOM, msg.room_id, msg.sender_id);
                 break;
 

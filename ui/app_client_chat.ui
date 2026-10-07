@@ -36,7 +36,11 @@
     </layout>
    </item>
    <item>
-    <widget class="QTextEdit" name="edit_room_messages"/>
+    <widget class="QTextEdit" name="edit_room_messages">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
