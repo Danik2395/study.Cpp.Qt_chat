@@ -24,6 +24,8 @@ private:
     QString user_sender_id;
     QString user_room_id;
 
+    bool is_connected_to_server;
+
 public:
     Chat_Client(QObject* parent = nullptr) : QObject(parent)
     {
@@ -36,15 +38,19 @@ public:
         connect(socket_udp, &QUdpSocket::readyRead, this, &Chat_Client::handle_discovery_responce);
 
         connect(socket_tcp, &QTcpSocket::connected, this, [this]() {
+            is_connected_to_server = true;
             emit connected_to_server();
         });
 
         connect(socket_tcp, &QTcpSocket::disconnected, this, [this]() {
             user_sender_id.clear();
             user_room_id.clear();
+            is_connected_to_server = false;
             emit server_disconnected();
         });
     }
+
+    bool is_connected() const { return is_connected_to_server; }
 
     void send_discovery_request() const
     {

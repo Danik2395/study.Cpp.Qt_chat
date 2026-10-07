@@ -57,6 +57,7 @@ private slots:
         });
         connect(client_socket, &QTcpSocket::disconnected, this, [this, client_socket]() {
             leave_room(client_socket);
+            client_socket->deleteLater();
         });
     }
 
@@ -161,7 +162,6 @@ private:
         {
             rooms.remove(room_id);
         }
-        socket->deleteLater();
     }
 
     void broadcast_to_room(const QString& room_id, const Message& msg) const

@@ -56,6 +56,7 @@ public:
 
         chat_ui->label_room_info->setProperty("room_info_property", chat_ui->label_room_info->text());
         login_ui->label_server_status->setProperty("server_status_property", login_ui->label_server_status->text());
+        login_ui->label_server_status->setText("");
 
         login_ui->edit_room_id->setMaxLength(14);
         login_ui->edit_sender_id->setMaxLength(14);
@@ -75,8 +76,9 @@ public:
                 chat.send_discovery_request();
 
                 QTimer::singleShot(TIME_TO_WAIT_SERVER_RESPONT_SEC , this, [this, &loop](){
+                        if (chat.is_connected()) return;
                         QString server_status_text = login_ui->label_server_status->property("server_status_property").toString();
-                        login_ui->label_server_status->setText(std::move(server_status_text.arg("Join request time expired.")));
+                        login_ui->label_server_status->setText(std::move(server_status_text.arg("Server connect request time expired.")));
                         login_ui->btn_connect_server->setEnabled(true);
                         });
 
@@ -142,7 +144,6 @@ private:
 
     void change_ui_on_room_left()
     {
-        login_ui->btn_connect_server->setEnabled(true);
         stacked_widget->setCurrentWidget(login_widget);
     }
 
