@@ -93,7 +93,7 @@ private:
         switch (msg.type)
         {
             case Message::Type::JOIN_ROOM:
-                if (check_on_join_room(socket, msg) != PASS) return;
+                if (sent_error_on_join_room(socket, msg) != PASS) return;
                 join_room(socket, msg.room_id);
                 send_message_to_socket(socket,
                         {
@@ -115,10 +115,9 @@ private:
         }
     }
 
-    ROOM_JOIN_CODE check_on_join_room(QTcpSocket* socket, const Message& msg) const
+    ROOM_JOIN_CODE sent_error_on_join_room(QTcpSocket* socket, const Message& msg) const
     {
-        if (msg.room_id.size() <= MAX_ROOM_ID) return PASS;
-        else
+        if (msg.room_id.size() <= MAX_ROOM_ID)
         {
             send_message_to_socket(socket,
                     {
@@ -127,8 +126,7 @@ private:
                     });
             return ROOM_ID_FAIL;
         }
-        if (msg.sender_id.size() <= MAX_ROOM_ID) return PASS;
-        else
+        if (msg.sender_id.size() <= MAX_ROOM_ID)
         {
             send_message_to_socket(socket,
                     {
@@ -137,6 +135,7 @@ private:
                     });
             return SENDER_ID_FAIL;
         }
+        return PASS;
     }
 
     void join_room(QTcpSocket* socket, const QString& room_id)
