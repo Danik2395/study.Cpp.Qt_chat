@@ -35,6 +35,10 @@ public:
         socket_udp = new QUdpSocket(this);
         connect(socket_udp, &QUdpSocket::readyRead, this, &Chat_Client::handle_discovery_responce);
 
+        connect(socket_tcp, &QTcpSocket::connected, this, [this]() {
+            emit connected_to_server();
+        });
+
         connect(socket_tcp, &QTcpSocket::disconnected, this, [this]() {
             user_sender_id.clear();
             user_room_id.clear();
@@ -50,9 +54,12 @@ public:
         };
 
         QByteArray discovery_request;
-        QDataStream discovery_request_datastream(discovery_request);
+        QDataStream discovery_request_datastream(&discovery_request, QIODevice::WriteOnly);
 
         Message::write(discovery_request_datastream, discovery_msg);
+
+        // To test on loopback
+        socket_udp->writeDatagram(discovery_request, QHostAddress::LocalHost, CHAT_PORT);
 
         socket_udp->writeDatagram(discovery_request, QHostAddress::Broadcast, CHAT_PORT);
     }
@@ -108,8 +115,10 @@ private slots:
             if (responce_msg.type != Message::Type::SERVER_SEARCH_RESPONCE ||
                 responce_msg.sender_id != QString::number(SECRET_CODE)) continue;
 
+            // On request if already connected
+            if (socket_tcp->state() != QAbstractSocket::UnconnectedState) continue;
+
             socket_tcp->connectToHost(responce_datagram.senderAddress().toString(), CHAT_PORT);
-            connect(socket_tcp, &QTcpSocket::connected, this, [this](){ emit connected_to_server(); });
         }
     }
 

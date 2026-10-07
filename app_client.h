@@ -75,7 +75,7 @@ public:
                 chat.send_discovery_request();
 
                 QTimer::singleShot(TIME_TO_WAIT_SERVER_RESPONT_SEC , this, [this, &loop](){
-                        QString server_status_text = chat_ui->label_room_info->property("server_status_property").toString();
+                        QString server_status_text = login_ui->label_server_status->property("server_status_property").toString();
                         login_ui->label_server_status->setText(std::move(server_status_text.arg("Join request time expired.")));
                         login_ui->btn_connect_server->setEnabled(true);
                         });
@@ -191,7 +191,7 @@ private slots:
         {
             case Message::Type::INFO:
                 {
-                QString server_status_text = chat_ui->label_room_info->property("server_status_property").toString();
+                QString server_status_text = login_ui->label_server_status->property("server_status_property").toString();
                 login_ui->label_server_status->setText(std::move(server_status_text.arg(QString::fromUtf8(msg.payload))));
                 break;
                 }
