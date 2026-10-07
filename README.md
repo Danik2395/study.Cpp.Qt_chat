@@ -1,5 +1,7 @@
 # Qt chat lab
 
+https://github.com/user-attachments/assets/6c82e278-a019-4903-b435-8e1e0129efb9
+
 ## Pipeline
 
 ### Server
