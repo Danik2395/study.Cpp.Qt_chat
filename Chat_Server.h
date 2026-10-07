@@ -80,7 +80,7 @@ private slots:
             };
 
             QByteArray response;
-            QDataStream response_datastream(response);
+            QDataStream response_datastream(&response, QIODevice::WriteOnly);
 
             Message::write(response_datastream, response_msg);
             udp_listener->writeDatagram(response, request_datagram.senderAddress(), request_datagram.senderPort());
@@ -123,7 +123,7 @@ private:
 
     ROOM_JOIN_CODE sent_error_on_join_room(QTcpSocket* socket, const Message& msg) const
     {
-        if (msg.room_id.size() <= MAX_ROOM_ID)
+        if (msg.room_id.size() > MAX_ROOM_ID)
         {
             send_message_to_socket(socket,
                     {
@@ -132,7 +132,7 @@ private:
                     });
             return ROOM_ID_FAIL;
         }
-        if (msg.sender_id.size() <= MAX_ROOM_ID)
+        if (msg.sender_id.size() > MAX_SENDER_ID)
         {
             send_message_to_socket(socket,
                     {

@@ -14,7 +14,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
 set(SOURCES_SERVER
     Network_Node.h
     Chat_Server.h
-    # chat_server.cpp
+    chat_server.cpp
 )
 
 set(SOURCES_CLIENT
@@ -26,8 +26,13 @@ set(SOURCES_CLIENT
     app_client.cpp
 )
 
-# add_executable(${PROJECT_NAME}_server WIN32 ${SOURCES_SERVER})
+add_executable(${PROJECT_NAME}_server WIN32 ${SOURCES_SERVER})
 add_executable(${PROJECT_NAME}_client WIN32 ${SOURCES_CLIENT})
+
+target_link_libraries(${PROJECT_NAME}_server PRIVATE
+    Qt6::Core
+    Qt6::Network
+)
 
 target_link_libraries(${PROJECT_NAME}_client PRIVATE
     Qt6::Core
